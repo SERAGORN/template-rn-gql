@@ -6,10 +6,11 @@ import Tabbar from 'react-native-tabbar-bottom';
 import Router from './router';
 import Home from './Home';
 import Profile from './Profile';
+import Chat from './ChatPage';
 
 
 const client = new ApolloClient({
-  uri: "http://192.168.1.34:4000/graphql",
+  uri: "http://192.168.1.35:4000/graphql",
   opts: {
     mode: 'no-cors',
   },
@@ -35,7 +36,7 @@ export default class App extends React.Component {
         {this.state.page === "HomeScreen" && <Home></Home>}
         {this.state.page === "NotificationScreen" && <Router navigation={this.props.navigation}></Router>}
         {this.state.page === "ProfileScreen" && <Profile></Profile>}
-        {this.state.page === "ChatScreen" && <Router navigation={this.props.navigation}></Router>}
+        {this.state.page === "ChatScreen" && <Chat></Chat>}
         {this.state.page === "SearchScreen" && <Text>Screen5</Text>}
 
         <Tabbar

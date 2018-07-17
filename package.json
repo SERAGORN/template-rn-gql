@@ -30,7 +30,9 @@
     "react": "16.3.1",
     "react-apollo": "^2.1.9",
     "react-native": "~0.55.2",
+    "react-native-gifted-chat": "^0.4.3",
     "react-native-tabbar-bottom": "^1.0.4",
-    "react-navigation": "^2.6.2"
+    "react-navigation": "^2.6.2",
+    "socket.io-client": "^2.1.1"
   }
 }
