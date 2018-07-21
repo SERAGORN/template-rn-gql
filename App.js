@@ -10,7 +10,7 @@ import Chat from './ChatPage';
 
 
 const client = new ApolloClient({
-  uri: "http://192.168.1.35:4000/graphql",
+  uri: "http://192.168.1.37:3001/graphql",
   opts: {
     mode: 'no-cors',
   },
