@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import ApolloClient from "apollo-boost";
 import { ApolloProvider } from "react-apollo";
 import Tabbar from 'react-native-tabbar-bottom';
@@ -7,6 +7,7 @@ import Router from './router';
 import Home from './Home';
 import Profile from './Profile';
 import Chat from './ChatPage';
+import LoginPage from './Login';
 
 
 const client = new ApolloClient({
@@ -22,12 +23,13 @@ export default class App extends React.Component {
     super()
     this.state = {
       page: "HomeScreen",
+      loggined: 0,
     }
   }
 
-  render() {
-    return (
-      <ApolloProvider client={client}>
+  renderStartApp = () => {
+    return(
+    
       <View style={styles.container}>
         {
           // if you are using react-navigation just pass the navigation object in your components like this:
@@ -71,6 +73,40 @@ export default class App extends React.Component {
           ]}
         />
       </View>
+     
+      )
+  }
+
+  loginPressed = () => {
+    this.setState({
+      loggined: 1
+    })
+  }
+  loginStart = () => {
+    if (this.state.loggined == 0) {
+    return(
+       <LoginPage>
+      <View style={styles.container}>
+        <TextInput style={styles.logininput} />
+        <Button onPress={()=>this.loginPressed()} title="Login"/>
+
+      </View>
+      </LoginPage>
+    )
+  }
+    if (this.state.loggined == 1) {
+      return (
+        this.renderStartApp()
+      )
+    }
+    
+  }
+
+
+  render() {
+    return (
+      <ApolloProvider client={client}>
+      {this.loginStart()}
       </ApolloProvider>
     );
   }
@@ -79,5 +115,9 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  logininput: {
+    width: 300,
+    height: 60
   }
 });

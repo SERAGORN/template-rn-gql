@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
-import { Query } from "react-apollo";
+import { Query , Mutation } from "react-apollo";
 import gql from "graphql-tag";
 
 export default class Home extends React.Component {
@@ -46,6 +46,31 @@ dataFetching = () => {
     }
 }
 
+dataMutation = () => {
+
+    return(
+        <Mutation mutation={gql`
+        mutation createPost($title: String!, $content: String!){
+        createPost(title: $title, content: $content) {
+          _id,
+          title,
+          content
+        }
+        }
+        `}>
+        {(createPost, { data }) => (
+          <View>
+            <Button
+              onPress={()=>{
+                createPost({ variables: { title: "KEK", content: "LOL" } });
+              }} title="PLEASE">
+            </Button>
+          </View>
+        )}
+      </Mutation>
+    )
+}
+
 stateRemove = () => {
  this.setState({
      refresh: 0
@@ -56,6 +81,8 @@ stateRender = () => {
         refresh: 1
     })
    }
+
+
   render() {
     return (
         <View style={styles.container}>
@@ -64,7 +91,7 @@ stateRender = () => {
             <Button style={styles.button} onPress={()=>(this.stateRender())} title="Render">
             </Button>
             {this.dataFetching()}
-
+            {this.dataMutation()}
             
         </View>
     );
