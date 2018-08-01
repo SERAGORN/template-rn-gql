@@ -2,16 +2,18 @@ import React from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import ApolloClient from "apollo-boost";
 import { ApolloProvider } from "react-apollo";
+import { Query , Mutation } from "react-apollo";
+import gql from "graphql-tag";
 import Tabbar from 'react-native-tabbar-bottom';
 import Router from './router';
 import Home from './Home';
 import Profile from './Profile';
 import Chat from './ChatPage';
-import LoginPage from './Login';
+import SocketIOClient from 'socket.io-client';
 
 
 const client = new ApolloClient({
-  uri: "http://192.168.1.37:3001/graphql",
+  uri: "http://192.168.1.38:3001/graphql",
   opts: {
     mode: 'no-cors',
   },
@@ -24,7 +26,12 @@ export default class App extends React.Component {
     this.state = {
       page: "HomeScreen",
       loggined: 0,
+      name: "",
+      password: "",
+      loading: 0,
+      load: 1,
     }
+    this.socket = SocketIOClient('http://192.168.1.38:3010');
   }
 
   renderStartApp = () => {
@@ -85,13 +92,13 @@ export default class App extends React.Component {
   loginStart = () => {
     if (this.state.loggined == 0) {
     return(
-       <LoginPage>
-      <View style={styles.container}>
-        <TextInput style={styles.logininput} />
-        <Button onPress={()=>this.loginPressed()} title="Login"/>
-
-      </View>
-      </LoginPage>
+        <View style={styles.containerLogin}>
+          {this.loginInput()}
+            {this.passwordInput()}
+            {this.LoginButton()}
+            {this.RegisterButton()}
+            {this.loginFetch()}
+        </View>
     )
   }
     if (this.state.loggined == 1) {
@@ -101,6 +108,111 @@ export default class App extends React.Component {
     }
     
   }
+
+
+  loginFetch = () => {
+    if (this.state.loading == 1) {
+      return (        
+      <Query
+          query={gql`
+          
+            query userone($login: String!, $password: String!) {
+              userone (login: $login, password: $password) {
+              _id
+              login
+              name
+              password
+              }
+            }
+          
+          `}
+          variables = {{login: this.state.name, password: this.state.password}}
+        >
+          {({ loading, error, data}) => {
+
+            if (loading) return <Text>LOAD</Text>;
+            if (error) <Text>ERROR</Text>;
+            if (data) {
+              this.setState({
+                loggined: 1
+              })
+            }
+            return <Text>{data.userone.name}</Text>
+          }}
+        </Query>
+        )
+      }
+  }
+  
+  dataMutation = () => {
+  
+      return(
+          <Mutation mutation={gql`
+          mutation createPost($title: String!, $content: String!){
+          createPost(title: $title, content: $content) {
+            _id,
+            title,
+            content
+          }
+          }
+          `}>
+          {(createPost, { data }) => (
+            <View>
+              <Button
+                onPress={()=>{
+                  createPost({ variables: { title: "KEK", content: "LOL" } });
+                }} title="PLEASE">
+              </Button>
+            </View>
+          )}
+        </Mutation>
+      )
+  }
+  
+  
+  
+  loginInput = () => {
+    return (
+      <TextInput style={styles.logininput} 
+      returnKeyLabel = {"next"}
+      onChangeText={(text) => this.setState({name:text})}
+      placeholder="login"/>
+    )
+  }
+  passwordInput = () => {
+    return(
+      <TextInput style={styles.logininput} 
+      returnKeyLabel = {"next"}
+      onChangeText={(text) => this.setState({password:text})}
+      placeholder="password"/>
+    )
+  }
+  RegisterButton = () => {
+    return(
+      <View>
+        <Button style={styles.buttonLogin} title="Register"/>
+      </View>
+    )
+  }
+  LoginButton = () => {
+    return(
+      <View>
+        <Button onPress={() => this.loginAct()} style={styles.buttonLogin} title="Login"/>
+      </View>
+    )
+  }
+  loginAct = () => {
+    this.setState({
+      loading: 1
+    }) 
+  }
+  logginedAct = () => {
+    this.setState({
+      loggined: 1
+    })
+  }
+
+
 
 
   render() {
@@ -115,6 +227,21 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  logininput: {
+    width: 300,
+    height: 60
+  },
+  containerLogin: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  buttonLogin: {
+      width: 200,
+      height: 50,
+      marginTop: 50
   },
   logininput: {
     width: 300,

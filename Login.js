@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Button ,TextInput} from 'react-native';
 import { Query , Mutation } from "react-apollo";
 import gql from "graphql-tag";
+import SocketIOClient from 'socket.io-client';
 
 export default class Login extends React.Component {
 
@@ -13,6 +14,7 @@ export default class Login extends React.Component {
           loading: 0,
           load: 1,
         }
+        this.socket = SocketIOClient('http://192.168.1.38:3010');
       }
 
 loginFetch = () => {
@@ -89,14 +91,14 @@ passwordInput = () => {
 RegisterButton = () => {
   return(
     <View>
-      <Button style={styles.button} title="Register"/>
+      <Button style={styles.buttonLogin} title="Register"/>
     </View>
   )
 }
 LoginButton = () => {
   return(
     <View>
-      <Button onPress={() => this.loginAct()} style={styles.button} title="Login"/>
+      <Button onPress={() => this.loginAct()} style={styles.buttonLogin} title="Login"/>
     </View>
   )
 }
@@ -109,25 +111,27 @@ loginAct = () => {
 
   render() {
     return (
-        <View style={styles.container}>
-            {this.loginInput()}
+        
+          <View style={styles.containerLogin}>
+          {this.loginInput()}
             {this.passwordInput()}
             {this.LoginButton()}
             {this.RegisterButton()}
             {this.loginFetch()}
         </View>
+            
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  containerLogin: {
     flex: 1,
     height: "100%",
     alignItems: "center",
     justifyContent: "center"
   },
-  button: {
+  buttonLogin: {
       width: 200,
       height: 50,
       marginTop: 50
