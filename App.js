@@ -13,7 +13,7 @@ import SocketIOClient from 'socket.io-client';
 
 
 const client = new ApolloClient({
-  uri: "http://192.168.1.38:3001/graphql",
+  uri: "http://192.168.1.35:3001/graphql",
   opts: {
     mode: 'no-cors',
   },
@@ -30,6 +30,9 @@ export default class App extends React.Component {
       password: "",
       loading: 0,
       load: 1,
+      register: 0,
+      regPasswordText: "",
+      regLoginText: ""
     }
     this.socket = SocketIOClient('http://192.168.1.38:3010');
   }
@@ -90,6 +93,13 @@ export default class App extends React.Component {
     })
   }
   loginStart = () => {
+    if (this.state.register == 1) {
+      return(
+        <View style={styles.containerRegister}>
+          {this.dataRegister()}
+        </View>
+      )
+    }
     if (this.state.loggined == 0) {
     return(
         <View style={styles.containerLogin}>
@@ -145,7 +155,6 @@ export default class App extends React.Component {
   }
   
   dataMutation = () => {
-  
       return(
           <Mutation mutation={gql`
           mutation createPost($title: String!, $content: String!){
@@ -167,6 +176,39 @@ export default class App extends React.Component {
           )}
         </Mutation>
       )
+  }
+  dataRegister = () => {
+    return(
+      <Mutation mutation={gql`
+      mutation createUser($login: String!, $password: String!) {
+        createUser(login: $login, password: $password) {
+          login,
+          password
+        }
+      }`}>
+      {(createUser,{data}) => (
+        <View>
+          <TextInput style={styles.logininput}
+          onChangeText={(text) => this.setState({regLoginText: text})}
+          placeholder="login"/>
+          <TextInput style={styles.logininput}
+          onChangeText={(text) => this.setState({regPasswordText: text})}
+          placeholder="password"/>
+          <Button onPress={()=>{createUser({variables:{login: this.state.regLoginText,
+          password: this.state.regPasswordText}})
+          this.setState({
+            loggined: 0,
+            loading: 0,
+            load: 1,
+            register: 0,
+          })
+          }}
+          title="reGON" />
+
+        </View>
+      ) }
+      </Mutation>
+    )
   }
   
   
@@ -190,7 +232,7 @@ export default class App extends React.Component {
   RegisterButton = () => {
     return(
       <View>
-        <Button style={styles.buttonLogin} title="Register"/>
+        <Button onPress={()=> this.registerAct()} style={styles.buttonLogin} title="Register"/>
       </View>
     )
   }
@@ -205,6 +247,11 @@ export default class App extends React.Component {
     this.setState({
       loading: 1
     }) 
+  }
+  registerAct = () => {
+    this.setState({
+      register: 1
+    })
   }
   logginedAct = () => {
     this.setState({

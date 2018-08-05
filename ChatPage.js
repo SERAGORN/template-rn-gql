@@ -1,88 +1,49 @@
 import React from 'react';
-import { View, Text, AsyncStorage } from 'react-native';
+import { View, Text, TextInput, Button, AsyncStorage } from 'react-native';
 import SocketIOClient from 'socket.io-client';
+
 import { GiftedChat } from 'react-native-gifted-chat';
 
-const USER_ID = '@userId';
+
 
 class ChatPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      message: "",
       messages: [],
-      userId: null
+      send: "",
     };
 
-    this.determineUser = this.determineUser.bind(this);
-    this.onReceivedMessage = this.onReceivedMessage.bind(this);
-    this.onSend = this.onSend.bind(this);
-    this._storeMessages = this._storeMessages.bind(this);
 
-    this.socket = SocketIOClient('http://192.168.1.35:4000');
-    this.socket.on('message', this.onReceivedMessage);
-    this.determineUser();
+    this.socket = SocketIOClient('http://192.168.1.35:3010');
   }
 
-  /**
-   * When a user joins the chatroom, check if they are an existing user.
-   * If they aren't, then ask the server for a userId.
-   * Set the userId to the component's state.
-   */
-  determineUser() {
-    AsyncStorage.getItem(USER_ID)
-      .then((userId) => {
-        // If there isn't a stored userId, then fetch one from the server.
-        if (!userId) {
-          this.socket.emit('userJoined', null);
-          this.socket.on('userJoined', (userId) => {
-            AsyncStorage.setItem(USER_ID, userId);
-            this.setState({ userId });
-          });
-        } else {
-          this.socket.emit('userJoined', userId);
-          this.setState({ userId });
-        }
-      })
-      .catch((e) => alert(e));
+  componentDidMount() {
+    this.renderMessage();
   }
-
-  // Event listeners
-  /**
-   * When the server sends a message to this.
-   */
-  onReceivedMessage(messages) {
-    this._storeMessages(messages);
+  renderMessage = () => {
+    this.socket.on('message', (message) => {
+      // React will automatically rerender the component when a new message is added.
+      this.setState({ message: message });
+    });
   }
-
-  /**
-   * When a message is sent, send the message to the server
-   * and store it in this component's state.
-   */
-  onSend(messages=[]) {
-    this.socket.emit('message', messages[0]);
-    this._storeMessages(messages);
+  sendTest = () => {
+    this.socket.emit('sended', this.state.send)
   }
 
   render() {
-    var user = { _id: this.state.userId || -1 };
 
     return (
-      <GiftedChat
-        messages={this.state.messages}
-        onSend={this.onSend}
-        user={user}
-      />
+      <View style={{top: 100}}>
+        <Button style={{paddingTop: 100, top: 100}} onPress={()=>this.sendTest()} title="EMIT"/>
+        <Text>{this.state.message}</Text>
+      <TextInput onChangeText={(text) => this.setState({send:text})}/>
+      <Button title="Send"/>
+      </View>
     );
   }
 
-  // Helper functions
-  _storeMessages(messages) {
-    this.setState((previousState) => {
-      return {
-        messages: GiftedChat.append(previousState.messages, messages),
-      };
-    });
-  }
 }
 
 module.exports = ChatPage;
